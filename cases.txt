@@ -1,0 +1,58 @@
+Пару слов в предисловие
+- чеклиста будет достаточно, сам отношусь к тем людям, кто предпочитает автоматизировать то, в чем разбирается (а не перекладывать в код кейзы по шагам),
+а собственно при большой нужде все шаги можно документировать прямо в коде
+- поскольку это веб сервис дополнительно обязываемся проверять ответы на запросы на валидность исполнения сервером 200 (или !=4xx !=5xx для простоты), это дополнительно дублировать не буду
+- предполагается что описание скудное, многие моменты перед тестированием стоит естественно уточнить, я буду писать комментарии
+
+вопросы к примеру которые возникли в процессе написания
+почему управляем json а отдаем в ответ text/html пейлоад?
+должно ли после удаления элемента айди оставаться не переиспользуемым
+
+
+Common prerequirements
+server is up and running azshoo/alaska:1.0
+there is endpoint accessible from test env by some defined hostname:port
+
+
+Tests (not prioritized)
+positive part:
+0. check GET /info endpoint - (not sure in scope)
+1. check empty db (after init or after purge) - GET /bear - expected []
+2. check non empty db - GET /bear - expected list of dic e.g. [{"bear_id":1,"bear_type":"BLACK","bear_name":"MIKHAIL","bear_age":17.5}]
+2.1 check all elements fits scheme, each elem in list has exactly 4 keyvalue pairs, bear_id is INT and is UNIQ, bear_type in [POLAR, BROWN, BLACK, GUMMY]
+bear_age is float and >0 and <25 (age limit needs to be clarified), bear_name is string, is uppercase, len < 255 (?)
+3. check exact bear added - GET /bear/:id - expected response DIC info previously uploaded (or stored and known) (name will be uppercased - to clarify if expected)
+3.1 check DIC fits scheme
+4. check exact bear added in list - GET /bear - expected response LIST of DIC - previously uploaded elem is in result list
+5. simply add bear - POST /bear with json payload {"bear_type":"BLACK","bear_name":"mikhail","bear_age":17.5} - expected response with bear_id
+(better to combine with cases 3-4)
+5.1 add every type of bear in [POLAR, BROWN, BLACK, GUMMY] - POST /bear - expected response with bear_id
+6. update some bear with known id - PUT /bear/:id - expected 200 no payload (to clarify) (combine with 3)
+6.1 update every type of bear
+7. delete some bear with known id - expected 200 no payload (to clarify), (combine with 3)
+8. delete all bears in list - expected 200 no payload (?) (combine with 1)
+
+negative scenarios:
+9 delete non existing bear - expected NOT 500, expected some errormsg payload (to clarify)
+10 update non existing bear - expected NOT 500, expected some errormsg payload (to clarify)
+11 get non existing bear - expected NOT 500, expected some errormsg payload (to clarify)
+12 add bear without required parameters - expected "Error. Pls fill all parameters"
+13 add bear with redundant parameters - expected some error (to clarify)
+14 add bear with negative age/string age/string non digits age/big age/ - err msg (?)
+15 add bear with name len<2 len>255 (to clarify)
+16 add bear with unsupported bear type string (may check case sensitive as well - to clarify)
+17 add bear - replace required param to unsupported type - err msg
+18 update existing bear similar to 12-17
+
+
+
+stress/load/durability testing (depends on business input)
+- clarify/measure max response times
+- add 200kk bears, make smoke with time measurement on all actions
+- parallel load testing - e.g. 10k rps - measure time, validate responses (5 then 3)
+- load, keep adding 100 bps for 168h, check time gegradation
+
+
+may check additionally
+injections
+db sync after container reboot
