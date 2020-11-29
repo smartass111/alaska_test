@@ -1,0 +1,84 @@
+#####################################################################################################################
+Представим, что тебе поступила задача протестировать REST API сервис, предоставляющий CRUD интерфейс для управления данными в нем.
+Докер образ сервиса доступен для скачивания в репозитории: https://hub.docker.com/r/azshoo/alaska с тэгом образа 1.0
+При запуске контейнера стартует приложение, доступное внутри контейнера по адресу http://0.0.0.0:8091
+Все имеющееся описание по принципам работы сервиса можно получить, отправив GET запрос на эндпоинт /info
+
+Необходимо:
+- Скачать докер образ и запустить приложение.
+- Составить список проверок, которые необходимо провести чтобы убедиться в работоспособности сервиса.
+- Написать более пяти примеров автотестов на разные API методы, реализующих проверки из описанных в предыдущем пункте.
+
+Условия:
+- Мы никак не ограничиваем тебя в формате описания необходимых проверок (полнота и форма описания, чеклист vs тест-кейсы и пр.),
+главное - чтобы описание проверок было прозрачным и достаточным для понимания сути проверки.
+- Для реализации автоматизированных тестов API нужно использовать PyTest.
+- Результат надо опубликовать на Github или Gitlab.
+#####################################################################################################################
+
+
+some explorations
+
+bash-4.2# curl 127.0.0.1:8091/info
+Welcome to Alaska!
+This is CRUD service for bears in alaska.
+CRUD routes presented with REST naming notation:
+
+POST                    /bear - create
+GET                     /bear - read all bears
+GET                     /bear/:id - read specific bear
+PUT                     /bear/:id - update specific bear
+DELETE                  /bear - delete all bears
+DELETE                  /bear/:id - delete specific bear
+
+Example of ber json: {"bear_type":"BLACK","bear_name":"mikhail","bear_age":17.5}.
+Available types for bears are: POLAR, BROWN, BLACK and GUMMY.
+
+
+curl 127.0.0.1:8091/bear -d '{"bear_type":"BLACK","bear_name":"mikhail","bear_age":17.5}'
+1
+
+curl 127.0.0.1:8091/bear -d '{"bear_type":"BLACK","bear_name":"mikhail","bear_a":17.5}'
+Error. Pls fill all parameters
+
+curl 127.0.0.1:8091/bear -d '{"bear_type":"BLACK","bear_name":"mikhail","bear_age":17.5}'
+2
+
+curl 127.0.0.1:8091/bear -d '{"bear_type":"BLACK","bear_name":"mikhail","bear_age":17.5, "param":3}'
+3
+
+curl 127.0.0.1:8091/bear
+[{"bear_id":1,"bear_type":"BLACK","bear_name":"MIKHAIL","bear_age":17.5},{"bear_id":2,"bear_type":"BLACK","bear_name":"MIKHAIL","bear_age":17.5},{"bear_id":3,"bear_type":"BLACK","bear_name":"MIKHAIL","bear_age":17.5}]
+
+curl 127.0.0.1:8091/bear/1
+{"bear_id":1,"bear_type":"BLACK","bear_name":"MIKHAIL","bear_age":17.5}
+
+curl 127.0.0.1:8091/bear -d '{"bear_type":"BLACK","bear_name":"mikhail2","bear_age":17.5, "param":}'
+<html><body><h2>500 Internal Server Error</h2></body></html>
+
+
+
+curl 127.0.0.1:8091/bear -d '{"bear_type":"BLACK","bear_name":"mikhail2","bear_age":"45"}'
+5
+curl 127.0.0.1:8091/bear
+[{"bear_id":1,"bear_type":"BLACK","bear_name":"MIKHAIL","bear_age":17.5},{"bear_id":3,"bear_type":"BLACK","bear_name":"MIKHAIL","bear_age":17.5},{"bear_id":4,"bear_type":"BLACK","bear_name":"MIKHAIL2","bear_age":17.5},{"bear_id":5,"bear_type":"BLACK","bear_name":"MIKHAIL2","bear_age":45.0}]
+
+
+curl 127.0.0.1:8091/bear -d '{"bear_id":2,"bear_type":"BLACK","bear_name":"mikhail2","bear_age":-2}'
+7
+
+curl 127.0.0.1:8091/bear/7
+{"bear_id":7,"bear_type":"BLACK","bear_name":"MIKHAIL2","bear_age":0.0}
+
+
+curl -X PUT 127.0.0.1:8091/bear/2 -d '{"bear_id":2,"bear_type":"BLACK","bear_name":"t2","bear_age":3}'
+<html><body><h2>500 Internal Server Error</h2></body></html>
+
+
+curl -X PUT 127.0.0.1:8091/bear/1 -d '{"bear_id":1,"b-X PUT 127.0.0.1:8091/bear/1 -d '{"bear_id":2,"bear_type":"BLACK","bear_name":"t2","bear_age":3}'
+OK
+
+curl -X DELETE 127.0.0.1:8091/bear
+OK
+curl 127.0.0.1:8091/bear
+[]
