@@ -31,6 +31,7 @@ bear_age is float and >0 and <25 (age limit needs to be clarified), bear_name is
 6.1 update every type of bear
 7. delete some bear with known id - expected 200 no payload (to clarify), (combine with 3)
 8. delete all bears in list - expected 200 no payload (?) (combine with 1)
+ add/update bear with dublicated fields (same name/color/age - combined or )
 
 negative scenarios:
 9 delete non existing bear - expected NOT 500, expected some errormsg payload (to clarify)
@@ -43,6 +44,7 @@ negative scenarios:
 16 add bear with unsupported bear type string (may check case sensitive as well - to clarify)
 17 add bear - replace required param to unsupported type - err msg
 18 update existing bear similar to 12-17
+19 add new/update existing bear with additional key "bear_id":1 - check it doesn't affect real bear_id
 
 
 
