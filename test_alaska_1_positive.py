@@ -38,7 +38,7 @@ def test_update_bear(foptions, endpoint='/bear/'):
     bear_id = random.choice(helper_get_ids(foptions))
     url = urlparse.urljoin(foptions['url'], endpoint)
     url = urlparse.urljoin(url, str(bear_id))
-    bear = foptions['default_bear']
+    bear = foptions['default_bear'].copy()
     bear['bear_age'] = 13
     r = requests.put(url, json=bear)
     assert r.status_code == 200
